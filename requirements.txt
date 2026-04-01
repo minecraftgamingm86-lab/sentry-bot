@@ -1,23 +1,2 @@
 discord.py==2.4.0
-
-# Core utilities
 python-dotenv==1.0.1
-aiohttp==3.11.0
-
-# Database (choose one or both)
-aiosqlite==0.20.0          # Lightweight SQLite (recommended for beginners)
-motor==3.7.0               # MongoDB (if you want a powerful NoSQL database)
-
-# Advanced features
-pillow==11.1.0             # For generating images, rank cards, memes, etc.
-numpy==2.2.1               # Math / stats / advanced image processing
-
-# Web & API related
-requests==2.32.3
-
-# Logging & debugging
-loguru==0.7.3
-
-# Optional but very useful for advanced bots
-psutil==7.0.0              # To show CPU/RAM usage in status
-asyncpg==0.30.0            # If you want PostgreSQL instead of SQLite
