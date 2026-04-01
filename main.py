@@ -3,14 +3,16 @@ import discord
 from discord.ext import commands
 import asyncio
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# No load_dotenv() needed on Railway
 TOKEN = os.getenv("BOT_TOKEN")
 
 if not TOKEN:
-    print("ERROR: BOT_TOKEN not found in .env file!")
+    print("ERROR: BOT_TOKEN not found in environment variables!")
+    print("Make sure you added BOT_TOKEN in Railway Variables tab.")
     exit(1)
+
+print(f"Token loaded successfully (length: {len(TOKEN)})")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -33,16 +35,15 @@ async def on_ready():
     print(f"Servers            •   {len(bot.guilds)}")
     print("═" * 60)
 
-    # Register persistent views (Ticket + Close button)
+    # Register persistent views
     try:
         from cogs.tickets import PersistentTicketView, CloseTicketView
         bot.add_view(PersistentTicketView())
         bot.add_view(CloseTicketView())
-        print("✅ Ticket system ready")
-    except:
-        print("Ticket views skipped")
+        print("✅ Ticket views registered")
+    except Exception as e:
+        print(f"Ticket views registration failed: {e}")
 
-    # Load all cogs silently (no spam)
     print("Loading cogs...")
     cog_folder = "cogs"
     loaded = 0
@@ -53,11 +54,14 @@ async def on_ready():
                 cog_name = f"cogs.{filename[:-3]}"
                 try:
                     await bot.load_extension(cog_name)
+                    print(f"  Loaded → {cog_name}")
                     loaded += 1
-                except:
-                    pass  # silent fail
+                except Exception as e:
+                    print(f"  FAILED → {cog_name}")
+    else:
+        print("❌ cogs folder not found!")
 
-    print(f"✅ Bot fully ready! ({loaded} cogs loaded)")
+    print(f"✅ Bot ready! ({loaded} cogs loaded)")
     print("═" * 60)
 
 
