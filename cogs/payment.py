@@ -5,7 +5,7 @@ from discord.ui import Button, View, Modal, TextInput
 import json
 import os
 
-CONFIG_PATH = "data/payment_methods.json"
+CONFIG_PATH = "/app/data/payment_methods.json"
 
 def load_payment_config():
     if os.path.exists(CONFIG_PATH):
