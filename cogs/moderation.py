@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime
 
-CONFIG_PATH = "/app/data/config.json"   # for welcome or tickets
+CONFIG_PATH = "data/modlogs.json"
 
 def load_logs():
     if os.path.exists(CONFIG_PATH):
@@ -34,11 +34,13 @@ class Moderation(commands.Cog):
             "reason": reason,
             "timestamp": datetime.utcnow().isoformat()
         }
+        if action_type not in logs:
+            logs[action_type] = []
         logs[action_type].append(entry)
         save_logs(logs)
 
     # ====================== BAN ======================
-    @commands.command(name="ban", help="Ban a member")
+    @commands.command(name="ban")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         if member.top_role >= ctx.author.top_role:
@@ -47,7 +49,7 @@ class Moderation(commands.Cog):
         self.log_action("ban", member, ctx.author, reason)
 
         try:
-            await member.send(f"You have been **banned** from **{ctx.guild.name}**.\nReason: {reason}")
+            await member.send(f"You have been banned from **{ctx.guild.name}**.\nReason: {reason}")
         except:
             pass
 
@@ -55,7 +57,7 @@ class Moderation(commands.Cog):
         await ctx.send(f"✅ {member.mention} has been banned.")
 
     # ====================== KICK ======================
-    @commands.command(name="kick", help="Kick a member")
+    @commands.command(name="kick")
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         if member.top_role >= ctx.author.top_role:
@@ -64,7 +66,7 @@ class Moderation(commands.Cog):
         self.log_action("kick", member, ctx.author, reason)
 
         try:
-            await member.send(f"You have been **kicked** from **{ctx.guild.name}**.\nReason: {reason}")
+            await member.send(f"You have been kicked from **{ctx.guild.name}**.\nReason: {reason}")
         except:
             pass
 
@@ -72,7 +74,7 @@ class Moderation(commands.Cog):
         await ctx.send(f"✅ {member.mention} has been kicked.")
 
     # ====================== TIMEOUT ======================
-    @commands.command(name="timeout", help="Timeout a member")
+    @commands.command(name="timeout")
     @commands.has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: discord.Member, minutes: int, *, reason: str = "No reason provided"):
         if member.top_role >= ctx.author.top_role:
@@ -82,14 +84,14 @@ class Moderation(commands.Cog):
         await ctx.send(f"✅ {member.mention} has been timed out for {minutes} minutes.")
 
     # ====================== UNTIMEOUT ======================
-    @commands.command(name="untimeout", help="Remove timeout from a member")
+    @commands.command(name="untimeout")
     @commands.has_permissions(moderate_members=True)
     async def untimeout(self, ctx, member: discord.Member):
         await member.timeout(None)
         await ctx.send(f"✅ {member.mention} is no longer timed out.")
 
     # ====================== PURGE ======================
-    @commands.command(name="purge", help="Delete messages. +purge <amount>")
+    @commands.command(name="purge")
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount: int):
         if amount < 1 or amount > 100:
@@ -98,7 +100,7 @@ class Moderation(commands.Cog):
         await ctx.send(f"✅ Deleted {amount} messages.", delete_after=5)
 
     # ====================== WARN ======================
-    @commands.command(name="warn", help="Warn a member")
+    @commands.command(name="warn")
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         self.log_action("warn", member, ctx.author, reason)
@@ -111,7 +113,7 @@ class Moderation(commands.Cog):
         await ctx.send(f"✅ {member.mention} has been warned.")
 
     # ====================== UNWARN ======================
-    @commands.command(name="unwarn", help="Remove the latest warning from a member")
+    @commands.command(name="unwarn")
     @commands.has_permissions(manage_messages=True)
     async def unwarn(self, ctx, member: discord.Member):
         logs = load_logs()
@@ -119,26 +121,24 @@ class Moderation(commands.Cog):
         user_id = str(member.id)
 
         if guild_id in logs and "warn" in logs[guild_id] and logs[guild_id]["warn"]:
-            # Remove the latest warning
             removed = logs[guild_id]["warn"].pop()
             save_logs(logs)
-
-            await ctx.send(f"✅ Removed 1 warning from {member.mention}.")
+            await ctx.send(f"✅ Removed latest warning from {member.mention}.")
         else:
-            await ctx.send(f"{member.mention} has no warnings to remove.")
+            await ctx.send(f"{member.mention} has no warnings.")
 
     # ====================== UNBAN ======================
-    @commands.command(name="unban", help="Unban a user by ID")
+    @commands.command(name="unban")
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, user_id: int):
         try:
             user = await self.bot.fetch_user(user_id)
             await ctx.guild.unban(user)
-            await ctx.send(f"✅ {user.mention} has been unbanned.")
+            await ctx.send(f"✅ {user} has been unbanned.")
         except:
-            await ctx.send("❌ Failed to unban. Make sure the ID is correct and the user is banned.")
+            await ctx.send("❌ Failed to unban. Make sure the ID is correct.")
 
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
-    print("Moderation cog loaded with unwarn system")
+    print("Moderation cog loaded with warn/unwarn system")
