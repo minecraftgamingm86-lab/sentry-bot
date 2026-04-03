@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime
 
-CONFIG_PATH = "data/modlogs.json"
+CONFIG_PATH = "/app/data/payment_methods.json"
 
 def load_logs():
     if os.path.exists(CONFIG_PATH):
