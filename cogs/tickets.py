@@ -6,7 +6,7 @@ from discord import SelectOption, Interaction, CategoryChannel
 import json
 import os
 
-CONFIG_PATH = "data/ticket_config.json"
+CONFIG_PATH = "/app/data/payment_methods.json"
 
 def load_ticket_config():
     if os.path.exists(CONFIG_PATH):
